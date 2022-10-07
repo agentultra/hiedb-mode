@@ -1,4 +1,4 @@
-;;; hiedb.el --- Use hiedb for code completion and navigation in Haskell projects
+;;; hiedb.el --- Use hiedb code navigation and information
 
 ;; Copyright (C) 2022 James King
 
@@ -9,8 +9,7 @@
 ;;; Commentary:
 
 ;; This package provides a minor-mode front end to hiedb for querying
-;; Haskell code.  It uses the `watchman' program in a background
-;; process to reindex the hiedb when files are changed.
+;; Haskell code.
 
 ;;; Code:
 
