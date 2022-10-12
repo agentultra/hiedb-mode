@@ -95,20 +95,20 @@
 
 (defun call-hiedb (cmd mod sline scol)
   (message (format "running %s -D %s point-info %s %d %d"
-                         hiedb-command
-                         hiedb-dbfile
-                         mod sline scol))
+                   hiedb-command
+                   hiedb-dbfile
+                   mod sline scol))
   (let*
       ((log-buffer (get-buffer-create "*hiedb*")))
-      (set-buffer log-buffer)
-      (read-only-mode -1)
-      (with-current-buffer log-buffer
-        (erase-buffer)
-        (call-process "hiedb" nil t t
-             "-D" hiedb-dbfile cmd
-             mod (format "%d" sline) (format "%d" scol)))
-      (display-buffer-pop-up-window log-buffer nil)
-      (special-mode)))
+    (set-buffer log-buffer)
+    (read-only-mode -1)
+    (with-current-buffer log-buffer
+      (erase-buffer)
+      (call-process "hiedb" nil t t
+                    "-D" hiedb-dbfile cmd
+                    mod (format "%d" sline) (format "%d" scol)))
+    (display-buffer-pop-up-window log-buffer nil)
+    (special-mode)))
 
 
 ;; Utilities
