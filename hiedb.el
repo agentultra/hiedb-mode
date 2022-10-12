@@ -115,7 +115,7 @@
 
 (defun hiedb-module-from-path ()
   "Get the module name from the buffer file path."
-  (let ((module-path (string-remove-prefix (concat hiedb-project-root "/src") (buffer-file-name))))
+  (let ((module-path (string-remove-prefix hiedb-project-root (buffer-file-name))))
     (string-remove-prefix "." (subst-char-in-string ?/ ?. (string-remove-suffix ".hs" module-path)))))
 
 (provide 'hiedb)
