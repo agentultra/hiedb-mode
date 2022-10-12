@@ -94,10 +94,10 @@
   (call-hiedb "point-info" mod sline scol))
 
 (defun call-hiedb (cmd mod sline scol)
-  (message (format "running %s -D %s point-info %s %d %d"
+  (message (format "running %s -D %s %s %s %d %d"
                    hiedb-command
                    hiedb-dbfile
-                   mod sline scol))
+                   cmd mod sline scol))
   (let*
       ((log-buffer (get-buffer-create "*hiedb*")))
     (set-buffer log-buffer)
