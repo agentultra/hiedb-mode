@@ -52,74 +52,64 @@
   "Query hiedb for references of symbol at point."
   (interactive)
   (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-refs module (line-number-at-pos) (1+ (current-column)))
-    (switch-to-buffer-other-window "*hiedb*")
-    (special-mode)))
+    (hiedb-query-point-refs module (line-number-at-pos) (1+ (current-column)))))
 
 ;;;###autoload
 (defun hiedb-interactive-types ()
   "Query hiedb type of symbol at point."
   (interactive)
   (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-refs module (line-number-at-pos) (1+ (current-column)))
-    (switch-to-buffer-other-window "*hiedb*")
-    (special-mode)))
+    (hiedb-query-point-types module (line-number-at-pos) (1+ (current-column)))))
 
 ;;;###autoload
 (defun hiedb-interactive-defs ()
   "Query hiedb definition of symbol at point."
   (interactive)
   (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-defs module (line-number-at-pos) (1+ (current-column)))
-    (switch-to-buffer-other-window "*hiedb*")
-    (special-mode)))
+    (hiedb-query-point-defs module (line-number-at-pos) (1+ (current-column)))))
 
 ;;;###autoload
 (defun hiedb-interactive-info ()
   "Query hiedb information on symbol at point."
   (interactive)
   (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-info module (line-number-at-pos) (1+ (current-column)))
-    (switch-to-buffer-other-window "*hiedb*")
-    (special-mode)))
+    (hiedb-query-point-info module (line-number-at-pos) (1+ (current-column)))))
 
 ;; Shell commands for calling out to hiedb.
 
 (defun hiedb-query-point-refs (mod sline scol)
   "Query hiedb point-refs of MOD at SLINE SCOL."
-  (shell-command (format "%s -D %s point-refs %s %d %d"
-                         hiedb-command
-                         hiedb-dbfile
-                         mod sline scol)
-                 "*hiedb*"
-                 "*hiedb-errors*"))
+  (call-hiedb "point-refs" mod sline scol))
 
 (defun hiedb-query-point-types (mod sline scol)
   "Query type at point in MOD at SLINE SCOL."
-  (shell-command (format "%s -D %s point-types %s %d %d"
-                         hiedb-command
-                         hiedb-dbfile
-                         mod sline scol)
-                 "*hiedb*"
-                 "*hiedb-errors*"))
+  (call-hiedb "point-types" mod sline scol))
 
 (defun hiedb-query-point-defs (mod sline scol)
   "Query defintions at SLINE SCOL in MOD."
-  (shell-command (format "%s -D %s point-defs %s %d %d"
-                         hiedb-command
-                         hiedb-dbfile
-                         mod sline scol)
-                 "*hiedb*"
-                 "*hiedb-errors*"))
+  (call-hiedb "point-defs" mod sline scol))
 
 (defun hiedb-query-point-info (mod sline scol)
   "Query symbol information at SLINE SCOL in MOD."
-  (shell-command (format "%s -D %s point-info %s %d %d"
-                         hiedb-command
-                         hiedb-dbfile
-                         mod sline scol)
-                 "*hiedb*"
-                 "*hiedb-errors*"))
+  (call-hiedb "point-info" mod sline scol))
+
+(defun call-hiedb (cmd mod sline scol)
+  (message (format "running %s -D %s %s %s %d %d"
+                   hiedb-command
+                   hiedb-dbfile
+                   cmd mod sline scol))
+  (let*
+      ((log-buffer (get-buffer-create "*hiedb*")))
+    (set-buffer log-buffer)
+    (read-only-mode -1)
+    (with-current-buffer log-buffer
+      (erase-buffer)
+      (call-process "hiedb" nil t t
+                    "-D" hiedb-dbfile cmd
+                    mod (format "%d" sline) (format "%d" scol)))
+    (display-buffer-pop-up-window log-buffer nil)
+    (special-mode)))
+
 
 ;; Utilities
 
