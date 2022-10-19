@@ -42,7 +42,9 @@
   :keymap '(("\C-c\C-dr" . hiedb-interactive-refs)
             ("\C-c\C-dt" . hiedb-interactive-types)
             ("\C-c\C-dd" . hiedb-interactive-defs)
-            ("\C-c\C-d\i" . hiedb-interactive-info))
+            ("\C-c\C-d\i" . hiedb-interactive-info)
+            ("\C-c\C-d\s" . hiedb-interactive-reindex)
+            )
   )
 
 ;; Interactive functions
@@ -75,6 +77,12 @@
   (let ((module (hiedb-module-from-path)))
     (hiedb-query-point-info module (line-number-at-pos) (1+ (current-column)))))
 
+;;;###autoload
+(defun hiedb-interactive-reindex ()
+  "Query hiedb information on symbol at point."
+  (interactive)
+  (hiedb-reindex))
+
 ;; Shell commands for calling out to hiedb.
 
 (defun hiedb-query-point-refs (mod sline scol)
@@ -94,7 +102,7 @@
   (call-hiedb "point-info" mod sline scol))
 
 (defun call-hiedb (cmd mod sline scol)
-  (message (format "running %s -D %s %s %s %d %d"
+  (message (format "%s -D %s %s %s %d %d"
                    hiedb-command
                    hiedb-dbfile
                    cmd mod sline scol))
@@ -110,6 +118,24 @@
     (display-buffer-pop-up-window log-buffer nil)
     (special-mode)))
 
+(defun hiedb-reindex ()
+  (let*
+      ((log-buffer (get-buffer-create "*hiedb*"))
+       (cmd-args (format "-D %s index %s"
+                         hiedb-dbfile
+                         hiedb-hiefiles
+                         ))
+       )
+    (message (format "%s %s" hiedb-command cmd-args))
+    (set-buffer log-buffer)
+    (read-only-mode -1)
+    (with-current-buffer log-buffer
+      (erase-buffer)
+      (make-process :name "reindex hiedb"
+                    :buffer log-buffer
+                    :command (list "hiedb" "-D" hiedb-dbfile "index" hiedb-hiefiles)
+                    :stderr log-buffer))
+    (display-buffer-pop-up-window log-buffer nil)))
 
 ;; Utilities
 
