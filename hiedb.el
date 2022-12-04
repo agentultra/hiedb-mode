@@ -35,6 +35,7 @@
   :type 'string
   :group 'hiedb-mode)
 
+;;;###autoload
 (define-minor-mode hiedb-mode
   "A minor mode for querying hiedb."
   :init-value nil
