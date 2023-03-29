@@ -115,8 +115,13 @@
       (call-process "hiedb" nil t t
                     "-D" hiedb-dbfile cmd
                     mod (format "%d" sline) (format "%d" scol)))
-    (display-buffer-pop-up-window log-buffer nil)
-    (special-mode)))
+    (read-only-mode 1)
+    (display-buffer log-buffer
+                    '(display-buffer-pop-up-window . ((side . top)
+                                                      (window-height . 5)
+                                                      (mode . (special-mode))
+                                                      )))
+    ))
 
 (defun hiedb-reindex ()
   (let*
@@ -135,7 +140,12 @@
                     :buffer log-buffer
                     :command (list "hiedb" "-D" hiedb-dbfile "index" hiedb-hiefiles)
                     :stderr log-buffer))
-    (display-buffer-pop-up-window log-buffer nil)))
+    (read-only-mode 1)
+    (display-buffer log-buffer
+                    '(display-buffer-pop-up-window . ((side . top)
+                                                      (window-height . 5)
+                                                      (mode . (special-mode))
+                                                      )))))
 
 ;; Utilities
 
