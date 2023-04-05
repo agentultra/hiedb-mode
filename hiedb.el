@@ -155,10 +155,7 @@
   (let ((s (buffer-string)))
     (if (string-match "^module \\([^ \n]+\\)" s)
         (match-string 1 s)
-      (progn
-        (let ((module-path (string-remove-prefix hiedb-project-root (buffer-file-name))))
-          (string-remove-prefix "." (subst-char-in-string ?/ ?. (string-remove-suffix ".hs" module-path)))))
-      )))
+      (buffer-file-name))))
 
 (provide 'hiedb)
 ;;; hiedb.el ends here
