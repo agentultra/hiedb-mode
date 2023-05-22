@@ -113,7 +113,7 @@
     (read-only-mode -1)
     (with-current-buffer log-buffer
       (erase-buffer)
-      (call-process "hiedb" nil t t
+      (call-process hiedb-command nil t t
                     "-D" hiedb-dbfile cmd
                     mod (format "%d" sline) (format "%d" scol)))
     (read-only-mode 1)
@@ -139,7 +139,7 @@
       (erase-buffer)
       (make-process :name "reindex hiedb"
                     :buffer log-buffer
-                    :command (list "hiedb" "-D" hiedb-dbfile "index" hiedb-hiefiles)
+                    :command (list hiedb-command "-D" hiedb-dbfile "index" hiedb-hiefiles)
                     :stderr log-buffer))
     (read-only-mode 1)
     (display-buffer log-buffer
