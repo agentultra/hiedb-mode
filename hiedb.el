@@ -45,94 +45,104 @@
             ("\C-c\C-dd" . hiedb-interactive-defs)
             ("\C-c\C-d\i" . hiedb-interactive-info)
             ("\C-c\C-d\s" . hiedb-interactive-reindex)
+            ("\C-c\C-dT" . hiedb-interactive-type-def)
+            ("\C-c\C-dN" . hiedb-interactive-name-def)
             )
   )
 
-;; Interactive functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        Interactive functions        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;###autoload
 (defun hiedb-interactive-refs ()
   "Query hiedb for references of symbol at point."
   (interactive)
-  (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-refs module (line-number-at-pos) (1+ (current-column)))))
+  (query-info-at-point "point-refs"))
 
 ;;;###autoload
 (defun hiedb-interactive-types ()
   "Query hiedb type of symbol at point."
   (interactive)
-  (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-types module (line-number-at-pos) (1+ (current-column)))))
+  (query-info-at-point "point-types"))
 
 ;;;###autoload
 (defun hiedb-interactive-defs ()
   "Query hiedb definition of symbol at point."
   (interactive)
-  (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-defs module (line-number-at-pos) (1+ (current-column)))))
+  (query-info-at-point "point-defs"))
 
 ;;;###autoload
 (defun hiedb-interactive-info ()
   "Query hiedb information on symbol at point."
   (interactive)
-  (let ((module (hiedb-module-from-path)))
-    (hiedb-query-point-info module (line-number-at-pos) (1+ (current-column)))))
+  (query-info-at-point "point-info"))
 
 ;;;###autoload
 (defun hiedb-interactive-reindex ()
   "Query hiedb information on symbol at point."
   (interactive)
-  (hiedb-reindex))
+  (call-hiedb-reindex-async))
 
-;; Shell commands for calling out to hiedb.
+;;;###autoload
+(defun hiedb-interactive-type-def ()
+  "Look up definition of type."
+  (interactive)
+  (let ((value (read-string "Type name: ")))
+    (call-hiedb-sync "type-def" value)
+    ))
 
-(defun hiedb-query-point-refs (mod sline scol)
-  "Query hiedb point-refs of MOD at SLINE SCOL."
-  (call-hiedb "point-refs" mod sline scol))
+;;;###autoload
+(defun hiedb-interactive-name-def ()
+  "Look up definition of type."
+  (interactive)
+  (let ((value (read-string "Constructor name: ")))
+    (call-hiedb-sync "name-def" value)
+    ))
 
-(defun hiedb-query-point-types (mod sline scol)
-  "Query type at point in MOD at SLINE SCOL."
-  (call-hiedb "point-types" mod sline scol))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        Shell commands for calling out to hiedb        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun hiedb-query-point-defs (mod sline scol)
-  "Query defintions at SLINE SCOL in MOD."
-  (call-hiedb "point-defs" mod sline scol))
+;;; invoke the hiedb command that queries information at current position
+;;; cmd - the hiedb command name
+(defun query-info-at-point (cmd)
+  (let ((module (hiedb-module-from-path))
+        (sline (line-number-at-pos))
+        (scol (1+ (current-column)))
+       )
+    (call-hiedb-sync cmd module (format "%d" sline) (format "%d" scol))))
 
-(defun hiedb-query-point-info (mod sline scol)
-  "Query symbol information at SLINE SCOL in MOD."
-  (call-hiedb "point-info" mod sline scol))
-
-(defun call-hiedb (cmd mod sline scol)
-  (message (format "%s -D %s %s %s %d %d"
-                   hiedb-command
-                   hiedb-dbfile
-                   cmd mod sline scol))
+(defun call-hiedb-sync (&rest cmdArgs)
   (let*
       ((log-buffer (get-buffer-create "*hiedb*")))
+    (message (format "%s -D %s %s"
+                     hiedb-command
+                     hiedb-dbfile
+                     (mapconcat #'identity cmdArgs " ")
+                     ))
     (set-buffer log-buffer)
     (read-only-mode -1)
     (with-current-buffer log-buffer
       (erase-buffer)
-      (call-process hiedb-command nil t t
-                    "-D" hiedb-dbfile cmd
-                    mod (format "%d" sline) (format "%d" scol)))
-    (read-only-mode 1)
-    (display-buffer log-buffer
-                    '(display-buffer-pop-up-window . ((side . top)
-                                                      (window-height . 5)
-                                                      (mode . (special-mode))
-                                                      )))
-    ))
-
-(defun hiedb-reindex ()
+      (apply 'call-process
+             hiedb-command nil t t
+             "-D" hiedb-dbfile
+             cmdArgs)
+      (read-only-mode 1)
+      (display-buffer log-buffer
+                      '(display-buffer-pop-up-window . ((side . top)
+                                                        (window-height . 5)
+                                                        (mode . (special-mode))
+                                                        ))))))
+;;; Invoke reindex async since re-index usually take a while.
+(defun call-hiedb-reindex-async ()
   (let*
-      ((log-buffer (get-buffer-create "*hiedb*"))
-       (cmd-args (format "-D %s index %s"
-                         hiedb-dbfile
-                         hiedb-hiefiles
-                         ))
-       )
-    (message (format "%s %s" hiedb-command cmd-args))
+      ((log-buffer (get-buffer-create "*hiedb*")))
+    (message (format "%s -D -%s index %s"
+                     hiedb-command
+                     hiedb-dbfile
+                     hiedb-hiefiles))
     (set-buffer log-buffer)
     (read-only-mode -1)
     (with-current-buffer log-buffer
@@ -148,7 +158,9 @@
                                                       (mode . (special-mode))
                                                       )))))
 
-;; Utilities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;              Utilities ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun hiedb-module-from-path ()
   "Get the module name from the buffer file path."
