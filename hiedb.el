@@ -9,7 +9,8 @@
 ;;; Commentary:
 
 ;; This package provides a minor-mode front end to hiedb for querying
-;; Haskell code.
+;; Haskell code.  It is lightweight and meant to be used in tandem
+;; with haskell-mode for a more interactive development experience.
 
 ;;; Code:
 
@@ -107,13 +108,15 @@
 ;;; invoke the hiedb command that queries information at current position
 ;;; cmd - the hiedb command name
 (defun query-info-at-point (cmd)
+  "Query hiedb using CMD at the current point."
   (let ((module (hiedb-module-from-path))
         (sline (line-number-at-pos))
         (scol (1+ (current-column)))
-       )
+        )
     (call-hiedb-sync cmd module (format "%d" sline) (format "%d" scol))))
 
 (defun call-hiedb-sync (&rest cmdArgs)
+  "Synchronously call the hiedb command passing in CMDARGS as arguments."
   (let*
       ((log-buffer (get-buffer-create "*hiedb*")))
     (message (format "%s -D %s %s"
@@ -137,6 +140,7 @@
                                                         ))))))
 ;;; Invoke reindex async since re-index usually take a while.
 (defun call-hiedb-reindex-async ()
+  "Invoke re-indexing asychronously (this can take a while)."
   (let*
       ((log-buffer (get-buffer-create "*hiedb*")))
     (message (format "%s -D -%s index %s"
