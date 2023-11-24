@@ -134,10 +134,12 @@
              cmdArgs)
       (read-only-mode 1)
       (display-buffer log-buffer
-                      '(display-buffer-pop-up-window . ((side . top)
-                                                        (window-height . 5)
-                                                        (mode . (special-mode))
-                                                        ))))))
+                      '((display-buffer-in-side-window . ((side . top)
+                                                          (window-height . 5)
+                                                          (mode . (special-mode))
+                                                          (dedicated . t)
+                                                          )))))))
+
 ;;; Invoke reindex async since re-index usually take a while.
 (defun call-hiedb-reindex-async ()
   "Invoke re-indexing asychronously (this can take a while)."
