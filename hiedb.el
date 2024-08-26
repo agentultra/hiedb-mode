@@ -118,27 +118,14 @@
 (defun call-hiedb-sync (&rest cmdArgs)
   "Synchronously call the hiedb command passing in CMDARGS as arguments."
   (let*
-      ((log-buffer (get-buffer-create "*hiedb*")))
-    (message (format "%s -D %s %s"
-                     hiedb-command
-                     hiedb-dbfile
-                     (mapconcat #'identity cmdArgs " ")
-                     ))
-    (set-buffer log-buffer)
-    (read-only-mode -1)
-    (with-current-buffer log-buffer
-      (erase-buffer)
-      (apply 'call-process
-             hiedb-command nil t t
-             "-D" hiedb-dbfile
-             cmdArgs)
-      (read-only-mode 1)
-      (display-buffer log-buffer
-                      '((display-buffer-in-side-window . ((side . top)
-                                                          (window-height . 5)
-                                                          (mode . (special-mode))
-                                                          (dedicated . t)
-                                                          )))))))
+      ((log-buffer (get-buffer-create "*hiedb*"))
+       (queryCommand (format "%s -D %s %s"
+                             hiedb-command
+                             hiedb-dbfile
+                             (mapconcat #'identity cmdArgs " ")
+                             )))
+    (message queryCommand)
+    (compile queryCommand)))
 
 ;;; Invoke reindex async since re-index usually take a while.
 (defun call-hiedb-reindex-async ()
