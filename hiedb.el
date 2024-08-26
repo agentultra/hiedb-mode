@@ -15,6 +15,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'subr-x))
+(eval-when-compile (require 'compile))
 
 (defcustom hiedb-command "hiedb"
   "Path to the hiedb executable."
@@ -49,6 +50,10 @@
             ("\C-c\C-dT" . hiedb-interactive-type-def)
             ("\C-c\C-dN" . hiedb-interactive-name-def)
             )
+  )
+
+(define-compilation-mode hiedb-compilation-mode "hiedb"
+  "Setup 'compilation-mode for hiedb."
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -125,7 +130,7 @@
                              (mapconcat #'identity cmdArgs " ")
                              )))
     (message queryCommand)
-    (compile queryCommand)))
+    (compilation-start queryCommand #'hiedb-compilation-mode)))
 
 ;;; Invoke reindex async since re-index usually take a while.
 (defun call-hiedb-reindex-async ()
