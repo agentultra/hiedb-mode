@@ -52,9 +52,13 @@
             )
   )
 
+(defconst hiedb-regexp-alist
+  '(("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2)))
+
 (define-compilation-mode hiedb-compilation-mode "hiedb"
   "Setup 'compilation-mode for hiedb."
-  )
+  (setq-local compilation-error-regexp-alist
+              hiedb-regexp-alist))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;        Interactive functions        ;;
