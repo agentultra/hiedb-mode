@@ -124,7 +124,7 @@
   "Synchronously call the hiedb command passing in CMDARGS as arguments."
   (let*
       ((log-buffer (get-buffer-create "*hiedb*"))
-       (queryCommand (format "%s -D %s %s"
+       (queryCommand (format "%s --no-color -D %s %s"
                              hiedb-command
                              hiedb-dbfile
                              (mapconcat #'identity cmdArgs " ")
