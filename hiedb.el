@@ -53,7 +53,8 @@
   )
 
 (defconst hiedb-regexp-alist
-  '(("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2)))
+  '(("\\([[:alnum:]/-_ ]+.hs:\\([0-9]+\\):\\([0-9]+\\)\\)" 1 2 3)
+    ("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
 
 (define-compilation-mode hiedb-compilation-mode "hiedb"
   "Setup 'compilation-mode for hiedb."
