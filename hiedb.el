@@ -57,8 +57,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defconst hiedb-regexp-alist
-  '(("\\([[:alnum:]/-_ ]+.hs:\\([0-9]+\\):\\([0-9]+\\)\\)" 1 2 3)
-    ("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
+  '(("\\([[:alnum:]/]+.hs:\\([0-9]+\\):\\([0-9]+\\)\\)" 1 2 3)
+    ("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" hiedb-filepath-from-dotted-path 2 3)))
+
+(defun hiedb-filepath-from-dotted-path ()
+  "Convert a dotted-path module name to a file path."
+  (concat
+   hiedb-project-root
+   "/"
+   (string-replace "." "/" (match-string-no-properties 1))
+   ".hs"))
 
 (define-compilation-mode hiedb-compilation-mode "hiedb"
   "Setup 'compilation-mode for hiedb."
