@@ -57,8 +57,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defconst hiedb-regexp-alist
-  '(("\\([[:alnum:]/]+.hs:\\([0-9]+\\):\\([0-9]+\\)\\)" 1 2 3)
+  '(("\\([[:alnum:]/]+\\.hs\\):\\([0-9]+\\):\\([0-9]+\\)" hiedb-absolute-path 2 3)
     ("\\([A-Za-z\\.]+\\):\\([0-9]+\\):\\([0-9]+\\)" hiedb-filepath-from-dotted-path 2 3)))
+
+(defun hiedb-absolute-path ()
+  "Make a relative path from hiedb output into an absolute path."
+  (concat hiedb-project-root "/" (match-string-no-properties 1)))
 
 (defun hiedb-filepath-from-dotted-path ()
   "Convert a dotted-path module name to a file path."
